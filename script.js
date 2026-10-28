@@ -8,20 +8,31 @@ function show(id) {
 
 const fmt = (n) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 
-/* ---------- Intro ---------- */
+/* ---------- Intro: ein Satz, getippt, mit Pausen ---------- */
 async function intro() {
-  const el = $("#line1");
-  const text = "Lieber Papa, Du weißt, dein Sohn ist reich";
-  for (const ch of text) {
-    el.textContent += ch;
-    await wait(55);
+  // Textteile; nach jedem Teil gibt es eine Pause (ms)
+  const parts = [
+    ["Lieber Papa, du weißt, dein Sohn ist reich", 1700],
+    [", beschenkt an Luft und Liebe.", 1400],
+    [" Das Geld kommt auch bald von alleine, doch bis dahin …", 0],
+  ];
+  const full = parts.map((p) => p[0]).join("");
+  const typed = $("#typed"), rest = $("#rest");
+  rest.textContent = full; // unsichtbar, hält das Layout stabil
+
+  await wait(1600); // kleiner Start-Delay
+  let n = 0;
+  for (const [text, pause] of parts) {
+    for (const ch of text) {
+      n++;
+      typed.textContent = full.slice(0, n);
+      rest.textContent = full.slice(n);
+      await wait(ch === "," ? 220 : 60);
+    }
+    await wait(pause);
   }
-  await wait(1500);
-  $("#line2").classList.add("show");
-  await wait(1800);
-  el.classList.add("done");
-  $("#line3").classList.add("show");
-  await wait(1200);
+  typed.classList.add("done");
+  await wait(600);
   $("#next1").classList.add("show");
 }
 
@@ -31,13 +42,11 @@ async function costs() {
   const rows = [...document.querySelectorAll(".row")];
   const sum = 131 + 19.95 + 150.99;
 
-  // Miete
   rows[0].classList.add("show");
   await wait(900);
   rows[0].classList.add("struck");
   await wait(900);
 
-  // Essen mit Rechnung
   rows[1].classList.add("show");
   await wait(700);
   rows[1].classList.add("calc-open");
@@ -47,7 +56,6 @@ async function costs() {
   $("#calc2").classList.add("show");
   await wait(1400);
 
-  // Telefon
   rows[2].classList.add("show");
   await wait(900);
   rows[2].classList.add("struck");
@@ -58,7 +66,6 @@ async function costs() {
   rows[4].classList.add("show");
   await wait(800);
 
-  // Summe hochzählen
   $("#total").classList.add("show");
   const t0 = performance.now();
   await new Promise((resolve) => {
@@ -83,63 +90,128 @@ function dodge() {
     who.classList.add("run");
     who.style.left = r.left + "px";
     who.style.top = r.top + "px";
-    // Platzhalter, damit das Layout nicht springt
     const ph = document.createElement("div");
     ph.style.width = w + "px"; ph.style.height = h + "px";
     who.parentNode.insertBefore(ph, who);
   }
-  const x = pad + Math.random() * (window.innerWidth - w - pad * 2);
-  const y = pad + Math.random() * (window.innerHeight - h - pad * 2);
-  who.style.left = x + "px";
-  who.style.top = y + "px";
+  who.style.left = pad + Math.random() * (window.innerWidth - w - pad * 2) + "px";
+  who.style.top = pad + Math.random() * (window.innerHeight - h - pad * 2) + "px";
 }
 who.addEventListener("mouseenter", dodge);
 who.addEventListener("pointerdown", (e) => { e.preventDefault(); dodge(); });
 who.addEventListener("click", (e) => e.preventDefault());
 
-/* ---------- PDF ---------- */
+/* ---------- Dokument ---------- */
+let signed = false;
+
+function openDoc() {
+  $("#fDatum").value = new Date().toLocaleDateString("de-DE");
+  show("#pdf");
+}
+
+async function sign() {
+  if (signed) return;
+  signed = true;
+  const btn = $("#sign");
+  btn.disabled = true;
+  $("#sigPapa").classList.add("writing");
+  await wait(1700);
+  $("#sigPapa").classList.add("on");
+  btn.textContent = "Unterschrieben ✓";
+  $("#download").disabled = false;
+}
+
 function makePdf() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: "mm", format: "a4" });
-  doc.setTextColor(29, 29, 31);
+  const grey = [110, 110, 115], dark = [34, 34, 34], ink = [26, 63, 168];
+  const L = 20, R = 190;
 
-  doc.setFontSize(10); doc.setTextColor(110, 110, 115);
-  doc.text("Vereinbarung · nicht bindend", 20, 25);
+  // Briefkopf
+  doc.setFont("helvetica", "bold"); doc.setFontSize(20); doc.setTextColor(226, 0, 21);
+  doc.text("Papa GmbH", L, 25);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...grey);
+  doc.text("ABTEILUNG FAMILIE & FINANZEN", L, 30);
+  doc.text("Dok.-Nr. PAPA-2026-11", R, 30, { align: "right" });
+  const seg = (R - L) / 4;
+  [[226, 0, 21], [140, 29, 130], [31, 95, 139], [58, 157, 93]].forEach((c, i) => {
+    doc.setFillColor(...c); doc.rect(L + seg * i, 33, seg, 1.2, "F");
+  });
 
-  doc.setFontSize(26); doc.setTextColor(29, 29, 31); doc.setFont("helvetica", "bold");
-  doc.text("Unterstützungszusage", 20, 40);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(18); doc.setTextColor(...dark);
+  doc.text("Unterstützungsvereinbarung", L, 48);
 
-  doc.setFont("helvetica", "normal"); doc.setFontSize(13);
-  const body = doc.splitTextToSize(
-    "Ich, Papa, unterstütze meinen Sohn im nächsten Monat mit 301,94 €, weil ich ihn so sehr liebe und nicht möchte, dass er hungern muss.",
-    170
-  );
-  doc.text(body, 20, 55);
+  // Felder (handschriftlich = blau, kursiv)
+  const rows = [
+    ["Datum", $("#fDatum").value], ["Empfänger", $("#fName").value], ["Zeitraum", $("#fZeit").value],
+    ["Betrag", $("#fBetrag").value], ["Zahlungsart", $("#fArt").value],
+  ];
+  let y = 60;
+  rows.forEach(([k, v]) => {
+    doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...grey);
+    doc.text(k, L, y);
+    doc.setFont("times", "bolditalic"); doc.setFontSize(13); doc.setTextColor(...ink);
+    doc.text(v || "", L + 32, y);
+    doc.setDrawColor(200, 205, 220); doc.setLineDashPattern([0.8, 0.8], 0);
+    doc.line(L + 30, y + 1.8, R, y + 1.8);
+    y += 8;
+  });
+  doc.setLineDashPattern([], 0);
 
-  let y = 85;
-  [["Essen", "131,00 €"], ["Adobe-Abo (Uni)", "19,95 €"], ["Bosch BKK (Krankenkasse)", "150,99 €"]].forEach(([a, b]) => {
-    doc.text(a, 20, y); doc.text(b, 190, y, { align: "right" });
-    doc.setDrawColor(232, 232, 237); doc.line(20, y + 3, 190, y + 3);
-    y += 11;
+  y += 4;
+  doc.setFont("helvetica", "normal"); doc.setFontSize(10.5); doc.setTextColor(...dark);
+  doc.text(doc.splitTextToSize(
+    "Hiermit sagt der Unterzeichner (Papa) seinem Sohn für den oben genannten Zeitraum eine finanzielle Unterstützung zu, weil er ihn sehr liebt und nicht möchte, dass er hungern muss.",
+    R - L), L, y);
+  y += 20;
+
+  // Tabelle
+  doc.setFillColor(31, 95, 139); doc.rect(L, y, R - L, 7, "F");
+  doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(255, 255, 255);
+  doc.text("Position", L + 2, y + 4.7); doc.text("Betrag", R - 2, y + 4.7, { align: "right" });
+  y += 7;
+  doc.setFontSize(10.5);
+  [["Verpflegung", "131,00 €"], ["Adobe-Abo (Studium)", "19,95 €"], ["Bosch BKK (Krankenversicherung)", "150,99 €"]].forEach(([a, b]) => {
+    doc.setFont("helvetica", "normal"); doc.setTextColor(...dark);
+    doc.text(a, L + 2, y + 5); doc.text(b, R - 2, y + 5, { align: "right" });
+    doc.setDrawColor(232, 232, 237); doc.line(L, y + 7.5, R, y + 7.5);
+    y += 8;
   });
   doc.setFont("helvetica", "bold");
-  doc.text("Zusammen", 20, y + 2); doc.text("301,94 €", 190, y + 2, { align: "right" });
+  doc.text("Gesamt", L + 2, y + 5); doc.text("301,94 €", R - 2, y + 5, { align: "right" });
+  doc.setDrawColor(31, 95, 139); doc.setLineWidth(0.5); doc.line(L, y + 7.5, R, y + 7.5);
+  doc.setLineWidth(0.2);
+  y += 16;
 
-  doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(110, 110, 115);
-  doc.text("Miete und Telefon sind schon geregelt. Das Geld kommt bald von alleine, versprochen.", 20, y + 16);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(...grey);
+  doc.text("Miete und Telefon sind bereits geregelt.", L, y);
+  y += 9;
+  doc.setFont("helvetica", "bold"); doc.text("Anmerkung:", L, y);
+  doc.setFont("times", "bolditalic"); doc.setFontSize(12); doc.setTextColor(...ink);
+  doc.text(doc.splitTextToSize($("#fNote").value || "", R - L), L, y + 6);
 
-  doc.setDrawColor(29, 29, 31);
-  doc.line(20, 220, 85, 220); doc.line(115, 220, 190, 220);
-  doc.text("Papa", 20, 226); doc.text("Dein Sohn", 115, 226);
+  // Unterschriften
+  const sy = 215;
+  doc.setDrawColor(51, 51, 51);
+  doc.line(L, sy, 88, sy); doc.line(122, sy, R, sy);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...grey);
+  doc.text("Papa", L, sy + 5); doc.text("Josua", 122, sy + 5);
+  doc.setFont("times", "bolditalic"); doc.setFontSize(20); doc.setTextColor(...ink);
+  doc.text("Dein Papa", L + 4, sy - 3, { angle: 4 });
+  doc.text("Dein Josua", 126, sy - 3, { angle: 4 });
 
-  doc.setFont("helvetica", "bold"); doc.setFontSize(12); doc.setTextColor(255, 59, 48);
-  doc.text("VERTRAG NICHT BINDEND", 105, 255, { align: "center" });
+  // Fußzeile (unauffällig)
+  doc.setDrawColor(232, 232, 237); doc.line(L, 275, R, 275);
+  doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(161, 161, 166);
+  doc.text("Vertrag nicht bindend", L, 280);
+  doc.text("Seite 1 von 1", R, 280, { align: "right" });
 
-  doc.save("Unterstuetzungszusage.pdf");
+  doc.save("Unterstuetzungsvereinbarung.pdf");
 }
 
 $("#next1").addEventListener("click", costs);
-$("#help").addEventListener("click", () => show("#pdf"));
+$("#help").addEventListener("click", openDoc);
+$("#sign").addEventListener("click", sign);
 $("#download").addEventListener("click", makePdf);
 
 intro();
