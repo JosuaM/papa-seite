@@ -10,29 +10,30 @@ const fmt = (n) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximum
 
 /* ---------- Intro: ein Satz, getippt, mit Pausen ---------- */
 async function intro() {
-  // Textteile; nach jedem Teil gibt es eine Pause (ms)
-  const parts = [
-    ["Lieber Papa, du weißt, dein Sohn ist reich", 1700],
-    [", beschenkt an Luft und Liebe.", 1400],
-    [" Das Geld kommt auch bald von alleine, doch bis dahin …", 0],
-  ];
-  const full = parts.map((p) => p[0]).join("");
-  const typed = $("#typed"), rest = $("#rest");
-  rest.textContent = full; // unsichtbar, hält das Layout stabil
+  // Erster Satz steht allein in der Mitte und wirkt abgeschlossen
+  const typed = $("#typed"), typed2 = $("#typed2"), rest2 = $("#rest2");
+  const first = "Lieber Papa, du weißt, dein Sohn ist reich.";
+  const second = "Beschenkt an Luft und Liebe. Das Geld kommt auch bald von alleine, doch bis dahin …";
 
-  await wait(1600); // kleiner Start-Delay
-  let n = 0;
-  for (const [text, pause] of parts) {
-    for (const ch of text) {
-      n++;
-      typed.textContent = full.slice(0, n);
-      rest.textContent = full.slice(n);
-      await wait(ch === "," ? 220 : 60);
-    }
-    await wait(pause);
+  await wait(1800);
+  for (let i = 1; i <= first.length; i++) {
+    typed.textContent = first.slice(0, i);
+    await wait(first[i - 1] === "," ? 240 : 65);
   }
-  typed.classList.add("done");
   await wait(600);
+  typed.classList.add("done");
+
+  await wait(3200); // lange Pause, der Satz ist "zu Ende"
+
+  rest2.textContent = second; // unsichtbar, hält das Layout darunter stabil
+  for (let i = 1; i <= second.length; i++) {
+    typed2.textContent = second.slice(0, i);
+    rest2.textContent = second.slice(i);
+    const c = second[i - 1];
+    await wait(c === "." ? 700 : c === "," ? 240 : 60);
+  }
+  typed2.classList.add("done");
+  await wait(700);
   $("#next1").classList.add("show");
 }
 
