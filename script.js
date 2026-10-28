@@ -130,6 +130,10 @@ function makePdf() {
   const doc = new jsPDF({ unit: "mm", format: "a4" });
   const grey = [110, 110, 115], dark = [34, 34, 34], ink = [26, 63, 168];
   const L = 20, R = 190;
+  doc.addFileToVFS("Caveat.ttf", window.PDF_FONTS.caveat);
+  doc.addFont("Caveat.ttf", "Caveat", "normal");
+  doc.addFileToVFS("HomemadeApple.ttf", window.PDF_FONTS.apple);
+  doc.addFont("HomemadeApple.ttf", "HomemadeApple", "normal");
 
   // Briefkopf
   doc.setFont("helvetica", "bold"); doc.setFontSize(20); doc.setTextColor(226, 0, 21);
@@ -154,7 +158,7 @@ function makePdf() {
   rows.forEach(([k, v]) => {
     doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...grey);
     doc.text(k, L, y);
-    doc.setFont("times", "bolditalic"); doc.setFontSize(13); doc.setTextColor(...ink);
+    doc.setFont("Caveat", "normal"); doc.setFontSize(17); doc.setTextColor(...ink);
     doc.text(v || "", L + 32, y);
     doc.setDrawColor(200, 205, 220); doc.setLineDashPattern([0.8, 0.8], 0);
     doc.line(L + 30, y + 1.8, R, y + 1.8);
@@ -191,7 +195,7 @@ function makePdf() {
   doc.text("Miete und Telefon sind bereits geregelt.", L, y);
   y += 9;
   doc.setFont("helvetica", "bold"); doc.text("Anmerkung:", L, y);
-  doc.setFont("times", "bolditalic"); doc.setFontSize(12); doc.setTextColor(...ink);
+  doc.setFont("Caveat", "normal"); doc.setFontSize(16); doc.setTextColor(...ink);
   doc.text(doc.splitTextToSize($("#fNote").value || "", R - L), L, y + 6);
 
   // Unterschriften
@@ -200,7 +204,7 @@ function makePdf() {
   doc.line(L, sy, 88, sy); doc.line(122, sy, R, sy);
   doc.setFont("helvetica", "normal"); doc.setFontSize(8.5); doc.setTextColor(...grey);
   doc.text("Papa", L, sy + 5); doc.text("Josua", 122, sy + 5);
-  doc.setFont("times", "bolditalic"); doc.setFontSize(20); doc.setTextColor(...ink);
+  doc.setFont("HomemadeApple", "normal"); doc.setFontSize(15); doc.setTextColor(...ink);
   doc.text("Dein Papa", L + 4, sy - 3, { angle: 4 });
   doc.text("Dein Josua", 126, sy - 3, { angle: 4 });
 
