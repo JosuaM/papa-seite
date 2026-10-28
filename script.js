@@ -11,28 +11,31 @@ const fmt = (n) => n.toLocaleString("de-DE", { minimumFractionDigits: 2, maximum
 /* ---------- Intro: ein Satz, getippt, mit Pausen ---------- */
 async function intro() {
   // Erster Satz steht allein in der Mitte und wirkt abgeschlossen
-  const typed = $("#typed"), typed2 = $("#typed2"), rest2 = $("#rest2");
+  const typed = $("#typed");
   const first = "Lieber Papa, du weißt, dein Sohn ist reich.";
-  const second = "Beschenkt an Luft und Liebe. Das Geld kommt auch bald von alleine, doch bis dahin …";
+  const second = " beschenkt an Luft und Liebe. Das Geld kommt auch bald von alleine, doch bis dahin …";
+  let text = "";
+  const put = () => { typed.textContent = text; };
 
   await wait(1800);
-  for (let i = 1; i <= first.length; i++) {
-    typed.textContent = first.slice(0, i);
-    await wait(first[i - 1] === "," ? 240 : 65);
+  for (const c of first) {
+    text += c; put();
+    await wait(c === "," ? 240 : 65);
   }
-  await wait(600);
-  typed.classList.add("done");
 
-  await wait(3200); // lange Pause, der Satz ist "zu Ende"
+  await wait(3200); // Der Satz wirkt abgeschlossen
 
-  rest2.textContent = second; // unsichtbar, hält das Layout darunter stabil
-  for (let i = 1; i <= second.length; i++) {
-    typed2.textContent = second.slice(0, i);
-    rest2.textContent = second.slice(i);
-    const c = second[i - 1];
+  // Punkt wird korrigiert: weg, dann Komma, dann geht's in derselben Zeile weiter
+  text = text.slice(0, -1); put();
+  await wait(500);
+  text += ","; put();
+  await wait(500);
+
+  for (const c of second) {
+    text += c; put();
     await wait(c === "." ? 700 : c === "," ? 240 : 60);
   }
-  typed2.classList.add("done");
+  typed.classList.add("done");
   await wait(700);
   $("#next1").classList.add("show");
 }
