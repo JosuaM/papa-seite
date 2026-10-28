@@ -121,14 +121,18 @@ h2 { font-size: clamp(22px, 4.5vw, 34px); margin: 0; letter-spacing: -0.01em; }
 .label small { color: var(--muted); font-weight: 400; margin-left: 4px; }
 .amount { font-size: 18px; font-variant-numeric: tabular-nums; font-weight: 600; }
 
-.strike {
-  position: absolute; left: 14px; right: 14px; top: 50%;
-  height: 3px; background: #ff3b30; border-radius: 2px;
+.strike { display: none; }
+/* Durchstreichen mitten durch den Text (Label und Betrag), nicht durch die Kartenmitte */
+.row .label, .row .amount { position: relative; justify-self: start; }
+.row .amount { justify-self: end; }
+.row .label::after, .row .amount::after {
+  content: ""; position: absolute; left: -3px; right: -3px; top: 52%;
+  height: 3px; margin-top: -1.5px; background: #ff3b30; border-radius: 2px;
   transform: scaleX(0); transform-origin: left;
   transition: transform .8s cubic-bezier(.7,0,.2,1);
 }
-.row.struck .strike { transform: scaleX(1); }
-.row.struck .label, .row.struck .amount { opacity: .45; transition: opacity .6s ease; }
+.row.struck .label::after, .row.struck .amount::after { transform: scaleX(1); }
+.row.struck .label, .row.struck .amount { color: rgba(29,29,31,.5); transition: color .6s ease; }
 .tag {
   grid-column: 2 / 4; font-size: 13px; color: #34c759; font-weight: 600;
   max-height: 0; opacity: 0; overflow: hidden; transition: all .5s ease;
