@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lieber Papa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Screen 1: Intro -->
+  <section id="intro" class="screen active">
+    <div class="center">
+      <h1 id="line1" class="type"></h1>
+      <h2 id="line2" class="fade">Beschenkt an Luft und Liebe 💛</h2>
+      <p id="line3" class="fade sub">Das Geld kommt auch bald von alleine, doch bis dahin …</p>
+      <button id="next1" class="btn primary fade">Weiter</button>
+    </div>
+  </section>
+
+  <!-- Screen 2: Monatliche Ausgaben -->
+  <section id="costs" class="screen">
+    <div class="center wide">
+      <h2 class="title">Was ich nächsten Monat brauche 🧾</h2>
+
+      <ul class="list">
+        <li class="row" data-step="0">
+          <span class="emoji">🏠</span>
+          <span class="label">Miete</span>
+          <span class="amount">425,00 €</span>
+          <span class="strike"></span>
+          <span class="tag">schon geregelt ✓</span>
+        </li>
+
+        <li class="row food" data-step="1">
+          <span class="emoji">🛒</span>
+          <span class="label">Essen</span>
+          <span class="amount">131,00 €</span>
+          <div class="calc">
+            <div class="calc-line" id="calc1">131 € ÷ 4,33 Wochen</div>
+            <div class="calc-line" id="calc2">≈ <strong>30,25 €</strong> pro Woche</div>
+          </div>
+        </li>
+
+        <li class="row" data-step="2">
+          <span class="emoji">📱</span>
+          <span class="label">Telefonrechnung</span>
+          <span class="amount">–</span>
+          <span class="strike"></span>
+          <span class="tag">schon geregelt ✓</span>
+        </li>
+
+        <li class="row" data-step="3">
+          <span class="emoji">🎨</span>
+          <span class="label">Adobe-Abo <small>für die Uni</small></span>
+          <span class="amount">19,95 €</span>
+        </li>
+
+        <li class="row" data-step="4">
+          <span class="emoji">🩺</span>
+          <span class="label">Bosch BKK <small>Krankenkasse</small></span>
+          <span class="amount">150,99 €</span>
+        </li>
+      </ul>
+
+      <div class="total" id="total">
+        <span>Zusammen</span>
+        <strong id="totalNum">0,00 €</strong>
+      </div>
+
+      <div class="buttons" id="choices">
+        <button id="help" class="btn primary">Ich kann helfen 🤝</button>
+        <button id="who" class="btn ghost">Wer bist du? Ich kenne dich nicht 🤨</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 3: "PDF" -->
+  <section id="pdf" class="screen">
+    <div class="center wide">
+      <article class="paper">
+        <p class="paper-small">Vereinbarung · nicht bindend</p>
+        <h2>Unterstützungszusage</h2>
+        <p>
+          Ich, <strong>Papa</strong>, unterstütze meinen Sohn im nächsten Monat
+          mit <strong>301,94 €</strong>, weil ich ihn so sehr liebe und nicht
+          möchte, dass er hungern muss. 🥪❤️
+        </p>
+        <ul class="paper-list">
+          <li>🛒 Essen — 131,00 €</li>
+          <li>🎨 Adobe-Abo — 19,95 €</li>
+          <li>🩺 Bosch BKK — 150,99 €</li>
+        </ul>
+        <p class="paper-small">Miete und Telefon sind schon geregelt. Das Geld kommt bald von alleine, versprochen.</p>
+        <div class="sign">
+          <div><span class="line"></span>Papa</div>
+          <div><span class="line"></span>Dein Sohn</div>
+        </div>
+        <p class="notice">Vertrag nicht bindend 😉</p>
+      </article>
+      <button id="download" class="btn primary">PDF downloaden ⬇️</button>
+    </div>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
